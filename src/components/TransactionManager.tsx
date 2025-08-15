@@ -23,7 +23,9 @@ import { getTransactions, addTransaction, updateTransaction, deleteTransaction, 
 import AddTransactionDialog from "./AddTransactionDialog";
 import EditTransactionDialog from "./EditTransactionDialog";
 import { CurrencyContext } from './FinTrackerApp';
-import { formatCurrency } from '../lib/utils';
+import { formatCurrency, formatDate, formatPercentage } from '../lib/utils';
+import { TransactionsSkeleton } from './LoadingSkeleton';
+import { ErrorBoundary } from './ErrorBoundary';
 
 interface Transaction {
   id: string;
@@ -130,6 +132,10 @@ export function TransactionManager() {
   const totalExpenses = transactions
     .filter(t => t.type === 'expense')
     .reduce((sum, t) => sum + t.amount, 0);
+
+  if (loading && transactions.length === 0) {
+    return <TransactionsSkeleton />;
+  }
 
   // Add a handler to reload transactions after adding
   const reloadTransactions = async () => {

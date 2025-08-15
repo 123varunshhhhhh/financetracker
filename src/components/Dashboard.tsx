@@ -16,13 +16,15 @@ import {
   DollarSign,
   PieChart
 } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, PieChart as RePieChart, Pie, Cell } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, PieChart as RePieChart, Pie, Cell, Tooltip } from 'recharts';
 import { gsap } from 'gsap';
 import AddTransactionDialog from "./AddTransactionDialog";
 import { SidebarContext, CurrencyContext } from './FinTrackerApp';
 import { getTransactions, getUserSettings, onTransactionsSnapshot, onBudgetsSnapshot, onGoalsSnapshot, onGoalDepositsSnapshot, GoalDeposit, Goal } from '../lib/firebaseApi';
 import { auth } from '../firebaseConfig';
-import { formatCurrency } from '../lib/utils';
+import { formatCurrency, formatPercentage, formatDate, calculateSavingsRate, getFinancialHealthScore } from '../lib/utils';
+import { DashboardSkeleton } from './LoadingSkeleton';
+import { ErrorBoundary } from './ErrorBoundary';
 
 // --- Type Definitions ---
 interface Transaction {
@@ -110,6 +112,10 @@ export function Dashboard() {
     return <div className="text-center py-12 text-lg">Loading... Please sign in to view your dashboard.</div>;
   }
 
+  if (loading) {
+    return <DashboardSkeleton />;
+  }
+
   // Compute monthly summaries
   const groupByMonth = (transactions: Transaction[]): MonthlyData[] => {
     const result: Record<string, MonthlyData> = {};
@@ -167,7 +173,7 @@ export function Dashboard() {
   };
 
   // Improved custom label for PieChart with staggered small slice labels
-  const renderPieLabelSmart = (props) => {
+  const renderPieLabelSmart = (props: any) => {
     const { cx, cy, midAngle, outerRadius, percent, name, index } = props;
     const RADIAN = Math.PI / 180;
     let offset = 20;
@@ -181,7 +187,7 @@ export function Dashboard() {
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN) + yOffset;
     return (
-      <text x={x} y={y} fill="#fff" fontSize={13} textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
+      <text x={x} y={y} fill="hsl(var(--foreground))" fontSize={12} textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
         {name} {(percent * 100).toFixed(0)}%
       </text>
     );
@@ -312,6 +318,18 @@ export function Dashboard() {
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                 <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
                 <YAxis stroke="hsl(var(--muted-foreground))" />
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    color: 'hsl(var(--foreground))'
+                  }}
+                  formatter={(value: number, name: string) => [
+                    formatCurrency(value, currency),
+                    name === 'income' ? 'Income' : 'Expenses'
+                  ]}
+                />
                 <Area 
                   type="monotone" 
                   dataKey="income" 
@@ -357,6 +375,15 @@ export function Dashboard() {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    color: 'hsl(var(--foreground))'
+                  }}
+                  formatter={(value: number) => [formatCurrency(value, currency), 'Amount']}
+                />
               </RePieChart>
             </ResponsiveContainer>
             {/* Legend for all categories */}
