@@ -5,26 +5,39 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatCurrency(amount: number, currency: string) {
+export function formatCurrency(amount: number, currency: string, showOriginal?: { amount: number; currency: string }) {
   if (typeof amount !== 'number' || isNaN(amount)) {
     return formatCurrency(0, currency);
   }
   
+  let formatted: string;
+  
   switch (currency) {
     case 'BTC':
-      return `₿${amount.toFixed(8)}`;
+      formatted = `₿${amount.toFixed(8)}`;
+      break;
     case 'ETH':
-      return `Ξ${amount.toFixed(8)}`;
+      formatted = `Ξ${amount.toFixed(6)}`;
+      break;
     case 'SOL':
-      return `◎${amount.toFixed(4)}`;
+      formatted = `◎${amount.toFixed(4)}`;
+      break;
     default:
-      return new Intl.NumberFormat(undefined, {
+      formatted = new Intl.NumberFormat(undefined, {
         style: 'currency',
         currency,
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       }).format(amount);
   }
+  
+  // Show original amount if conversion happened
+  if (showOriginal && showOriginal.currency !== currency) {
+    const originalFormatted = formatCurrency(showOriginal.amount, showOriginal.currency);
+    formatted += ` (was ${originalFormatted})`;
+  }
+  
+  return formatted;
 }
 
 // Enhanced utility functions for better data handling

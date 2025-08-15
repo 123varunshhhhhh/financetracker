@@ -13,9 +13,11 @@ import { BudgetManager } from '@/components/BudgetManager';
 import { Analytics } from '@/components/Analytics';
 import { Goals } from '@/components/Goals';
 import { Settings } from '@/components/Settings';
+import { EnhancementRoadmap } from '@/components/EnhancementRoadmap';
+import { CurrencyRateTicker } from '@/components/CurrencySelector';
 import FinTrackerLogo from './FinTrackerLogo';
 
-export type View = 'dashboard' | 'transactions' | 'budget' | 'analytics' | 'goals' | 'settings';
+export type View = 'dashboard' | 'transactions' | 'budget' | 'analytics' | 'goals' | 'settings' | 'roadmap';
 
 // Create and export the context
 export const SidebarContext = createContext<{ currentView: View, setCurrentView: (v: View) => void }>({
@@ -63,6 +65,8 @@ const FinTrackerApp = () => {
         return <RequireAuth><Goals /></RequireAuth>;
       case 'settings':
         return <RequireAuth><Settings onCurrencyChange={setCurrency} /></RequireAuth>;
+      case 'roadmap':
+        return <RequireAuth><EnhancementRoadmap /></RequireAuth>;
       default:
         return <RequireAuth><Dashboard /></RequireAuth>;
     }
@@ -119,7 +123,8 @@ const FinTrackerApp = () => {
                   { id: 'budget', label: 'Budget', icon: '🏦' },
                   { id: 'analytics', label: 'Analytics', icon: '📈' },
                   { id: 'goals', label: 'Goals', icon: '🎯' },
-                  { id: 'settings', label: 'Settings', icon: '⚙️' }
+                  { id: 'settings', label: 'Settings', icon: '⚙️' },
+                  { id: 'roadmap', label: 'Roadmap', icon: '🚀' }
                 ].map((item) => (
                   <button
                     key={item.id}
@@ -135,6 +140,14 @@ const FinTrackerApp = () => {
                   </button>
                 ))}
               </nav>
+              
+              {/* Currency Rate Ticker */}
+              <div className="mt-8 p-3 bg-muted/20 rounded-lg">
+                <div className="text-xs font-medium text-muted-foreground mb-2">
+                  Exchange Rates
+                </div>
+                <CurrencyRateTicker currencies={['EUR', 'GBP', 'INR']} />
+              </div>
             </div>
 
             {/* Main Content */}

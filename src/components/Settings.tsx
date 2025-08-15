@@ -350,15 +350,17 @@ export function Settings({ onCurrencyChange }: { onCurrencyChange?: (currency: s
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="USD">USD - US Dollar</SelectItem>
-                    <SelectItem value="EUR">EUR - Euro</SelectItem>
-                    <SelectItem value="GBP">GBP - British Pound</SelectItem>
-                    <SelectItem value="CAD">CAD - Canadian Dollar</SelectItem>
-                    <SelectItem value="INR">INR - Indian Rupee</SelectItem>
-                    <SelectItem value="AUD">AUD - Australian Dollar</SelectItem>
-                    <SelectItem value="BTC">BTC - Bitcoin</SelectItem>
-                    <SelectItem value="ETH">ETH - Ethereum</SelectItem>
-                    <SelectItem value="SOL">SOL - Solana</SelectItem>
+                    <SelectItem value="USD">🇺🇸 USD - US Dollar</SelectItem>
+                    <SelectItem value="EUR">🇪🇺 EUR - Euro</SelectItem>
+                    <SelectItem value="GBP">🇬🇧 GBP - British Pound</SelectItem>
+                    <SelectItem value="CAD">🇨🇦 CAD - Canadian Dollar</SelectItem>
+                    <SelectItem value="INR">🇮🇳 INR - Indian Rupee</SelectItem>
+                    <SelectItem value="AUD">🇦🇺 AUD - Australian Dollar</SelectItem>
+                    <SelectItem value="JPY">🇯🇵 JPY - Japanese Yen</SelectItem>
+                    <SelectItem value="CNY">🇨🇳 CNY - Chinese Yuan</SelectItem>
+                    <SelectItem value="BTC">₿ BTC - Bitcoin</SelectItem>
+                    <SelectItem value="ETH">Ξ ETH - Ethereum</SelectItem>
+                    <SelectItem value="SOL">◎ SOL - Solana</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
