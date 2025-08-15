@@ -476,7 +476,8 @@ export function Dashboard() {
                     border: "3px solid #4ECDC4",
                     borderRadius: "16px",
                     color: "#ffffff",
-                    boxShadow: "0 15px 35px rgba(78, 205, 196, 0.4), 0 5px 15px rgba(0, 0, 0, 0.3)",
+                    boxShadow:
+                      "0 15px 35px rgba(78, 205, 196, 0.4), 0 5px 15px rgba(0, 0, 0, 0.3)",
                     fontSize: "16px",
                     fontWeight: "600",
                     padding: "12px 16px",
@@ -487,19 +488,8 @@ export function Dashboard() {
                     fontSize: "14px",
                   }}
                   formatter={(value: number, name: string) => [
-                    <span style={{ 
-                      color: name === "income" ? "#00ff88" : "#ff6b6b",
-                      fontWeight: "700",
-                      fontSize: "16px"
-                    }}>
-                      {formatCurrency(value, currency)}
-                    </span>,
-                    <span style={{ 
-                      color: name === "income" ? "#00ff88" : "#ff6b6b",
-                      fontWeight: "600"
-                    }}>
-                      {name === "income" ? "💰 Income" : "💸 Expenses"}
-                    </span>,
+                    formatCurrency(value, currency),
+                    name === "income" ? "💰 Income" : "💸 Expenses",
                   ]}
                 />
                 <Area
@@ -553,7 +543,8 @@ export function Dashboard() {
                     border: "3px solid #bb86fc",
                     borderRadius: "16px",
                     color: "#ffffff",
-                    boxShadow: "0 15px 35px rgba(187, 134, 252, 0.4), 0 5px 15px rgba(0, 0, 0, 0.3)",
+                    boxShadow:
+                      "0 15px 35px rgba(187, 134, 252, 0.4), 0 5px 15px rgba(0, 0, 0, 0.3)",
                     fontSize: "16px",
                     fontWeight: "600",
                     padding: "12px 16px",
@@ -564,20 +555,8 @@ export function Dashboard() {
                     fontSize: "14px",
                   }}
                   formatter={(value: number, name: string) => [
-                    <span style={{ 
-                      color: "#ffd700",
-                      fontWeight: "700",
-                      fontSize: "18px",
-                      textShadow: "0 0 10px rgba(255, 215, 0, 0.5)"
-                    }}>
-                      {formatCurrency(value, currency)}
-                    </span>,
-                    <span style={{ 
-                      color: "#ff6b6b",
-                      fontWeight: "600"
-                    }}>
-                      💳 {name || "Amount"}
-                    </span>,
+                    formatCurrency(value, currency),
+                    `💳 ${name || "Amount"}`,
                   ]}
                 />
               </RePieChart>
