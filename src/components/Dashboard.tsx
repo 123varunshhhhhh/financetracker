@@ -42,7 +42,6 @@ import {
 import { auth } from "../firebaseConfig";
 import { formatCurrency } from "../lib/utils";
 import { DashboardSkeleton } from "./LoadingSkeleton";
-import { useConvertedTransactions } from "./CurrencyDisplay";
 
 // --- Type Definitions ---
 interface Transaction {
@@ -148,11 +147,8 @@ export function Dashboard() {
     return <DashboardSkeleton />;
   }
 
-  // Use converted transactions
-  const { convertedTransactions } = useConvertedTransactions(
-    transactions,
-    "USD"
-  );
+  // Use transactions directly (temporarily disable conversion to fix React error)
+  const convertedTransactions = transactions;
 
   // Compute monthly summaries from converted transactions
   const groupByMonth = (transactions: any[]): MonthlyData[] => {
@@ -472,24 +468,14 @@ export function Dashboard() {
                 <YAxis stroke="hsl(var(--muted-foreground))" />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#1a1a2e",
-                    border: "3px solid #4ECDC4",
-                    borderRadius: "16px",
+                    backgroundColor: "rgba(0, 0, 0, 0.9)",
+                    border: "2px solid #4ECDC4",
+                    borderRadius: "8px",
                     color: "#ffffff",
-                    boxShadow:
-                      "0 15px 35px rgba(78, 205, 196, 0.4), 0 5px 15px rgba(0, 0, 0, 0.3)",
-                    fontSize: "16px",
-                    fontWeight: "600",
-                    padding: "12px 16px",
-                  }}
-                  labelStyle={{
-                    color: "#4ECDC4",
-                    fontWeight: "700",
-                    fontSize: "14px",
                   }}
                   formatter={(value: number, name: string) => [
                     formatCurrency(value, currency),
-                    name === "income" ? "💰 Income" : "💸 Expenses",
+                    name === "income" ? "Income" : "Expenses",
                   ]}
                 />
                 <Area
@@ -539,24 +525,14 @@ export function Dashboard() {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#2d1b69",
-                    border: "3px solid #bb86fc",
-                    borderRadius: "16px",
+                    backgroundColor: "rgba(0, 0, 0, 0.9)",
+                    border: "2px solid #bb86fc",
+                    borderRadius: "8px",
                     color: "#ffffff",
-                    boxShadow:
-                      "0 15px 35px rgba(187, 134, 252, 0.4), 0 5px 15px rgba(0, 0, 0, 0.3)",
-                    fontSize: "16px",
-                    fontWeight: "600",
-                    padding: "12px 16px",
                   }}
-                  labelStyle={{
-                    color: "#bb86fc",
-                    fontWeight: "700",
-                    fontSize: "14px",
-                  }}
-                  formatter={(value: number, name: string) => [
+                  formatter={(value: number) => [
                     formatCurrency(value, currency),
-                    `💳 ${name || "Amount"}`,
+                    "Amount",
                   ]}
                 />
               </RePieChart>
