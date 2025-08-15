@@ -4,7 +4,7 @@ import { AppSidebar } from '@/components/AppSidebar';
 import { gsap } from 'gsap';
 import Lenis from '@studio-freight/lenis';
 import { RequireAuth } from './RequireAuth';
-import { getUserSettings } from '../lib/firebaseApi';
+import { getUserSettings, saveUserSettings } from '../lib/firebaseApi';
 import { CurrencyConverter } from './CurrencyConverter';
 import { Menu, X } from 'lucide-react';
 import { Dashboard } from '@/components/Dashboard';
@@ -14,6 +14,7 @@ import { Analytics } from '@/components/Analytics';
 import { Goals } from '@/components/Goals';
 import { Settings } from '@/components/Settings';
 import { EnhancementRoadmap } from '@/components/EnhancementRoadmap';
+import { useSimpleCurrencyConversion } from '../hooks/useSimpleCurrencyConversion';
 import FinTrackerLogo from './FinTrackerLogo';
 
 export type View = 'dashboard' | 'transactions' | 'budget' | 'analytics' | 'goals' | 'settings' | 'roadmap';
@@ -24,30 +25,58 @@ export const SidebarContext = createContext<{ currentView: View, setCurrentView:
   setCurrentView: () => {},
 });
 
-export const CurrencyContext = createContext<{ currency: string }>({ currency: 'USD' });
+export const CurrencyContext = createContext<{ 
+  currency: string;
+  setCurrency: (currency: string) => Promise<void>;
+  isConverting: boolean;
+}>({ 
+  currency: 'USD',
+  setCurrency: async () => {},
+  isConverting: false
+});
 
 const FinTrackerApp = () => {
   console.log('FinTrackerApp rendering...');
   const [currentView, setCurrentView] = useState<View>('dashboard');
-  const [currency, setCurrency] = useState('USD');
+  const [currency, setCurrencyState] = useState('USD');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { isConverting } = useSimpleCurrencyConversion();
 
   useEffect(() => {
     getUserSettings()
       .then(settings => {
-        if (settings && settings.currency) setCurrency(settings.currency);
+        if (settings && settings.currency) setCurrencyState(settings.currency);
       })
       .catch(err => {
         if (err.message === 'Not authenticated') {
-          // Option 1: Redirect to login (if using react-router)
-          // window.location.href = '/login';
-          // Option 2: Show a message (for now, just log)
           console.warn('User not authenticated, redirect or show login.');
         } else {
           console.error(err);
         }
       });
   }, []);
+
+  const setCurrency = async (newCurrency: string) => {
+    if (newCurrency === currency) return;
+    
+    try {
+      // Update the currency in state
+      setCurrencyState(newCurrency);
+      
+      // Save to user settings
+      const currentSettings = await getUserSettings();
+      await saveUserSettings({
+        ...currentSettings,
+        currency: newCurrency
+      });
+      
+      console.log(`Currency changed to ${newCurrency}`);
+    } catch (error) {
+      console.error('Failed to change currency:', error);
+      // Revert on error
+      setCurrencyState(currency);
+    }
+  };
 
   // Enhanced renderView with all components
   const renderView = () => {
@@ -75,7 +104,7 @@ const FinTrackerApp = () => {
   
   return (
     <SidebarContext.Provider value={{ currentView, setCurrentView }}>
-      <CurrencyContext.Provider value={{ currency }}>
+      <CurrencyContext.Provider value={{ currency, setCurrency, isConverting }}>
         <div className="min-h-screen w-full bg-gradient-to-br from-background to-muted/20">
           {/* Mobile Hamburger */}
           <button
