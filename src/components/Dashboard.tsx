@@ -149,7 +149,10 @@ export function Dashboard() {
   }
 
   // Use converted transactions
-  const { convertedTransactions } = useConvertedTransactions(transactions, "USD");
+  const { convertedTransactions } = useConvertedTransactions(
+    transactions,
+    "USD"
+  );
 
   // Compute monthly summaries from converted transactions
   const groupByMonth = (transactions: any[]): MonthlyData[] => {
@@ -185,7 +188,7 @@ export function Dashboard() {
       name,
       value,
       color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
-      percentage: total > 0 ? Math.round((value as number / total) * 100) : 0,
+      percentage: total > 0 ? Math.round(((value as number) / total) * 100) : 0,
     }));
   };
   const expenseCategories: ExpenseCategory[] = getExpenseCategories(
@@ -469,17 +472,34 @@ export function Dashboard() {
                 <YAxis stroke="hsl(var(--muted-foreground))" />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "hsl(var(--background))",
-                    border: "2px solid hsl(var(--border))",
-                    borderRadius: "12px",
-                    color: "hsl(var(--foreground))",
-                    boxShadow: "0 10px 25px rgba(0, 0, 0, 0.3)",
+                    backgroundColor: "#1a1a2e",
+                    border: "3px solid #4ECDC4",
+                    borderRadius: "16px",
+                    color: "#ffffff",
+                    boxShadow: "0 15px 35px rgba(78, 205, 196, 0.4), 0 5px 15px rgba(0, 0, 0, 0.3)",
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    padding: "12px 16px",
+                  }}
+                  labelStyle={{
+                    color: "#4ECDC4",
+                    fontWeight: "700",
                     fontSize: "14px",
-                    fontWeight: "500",
                   }}
                   formatter={(value: number, name: string) => [
-                    formatCurrency(value, currency),
-                    name === "income" ? "Income" : "Expenses",
+                    <span style={{ 
+                      color: name === "income" ? "#00ff88" : "#ff6b6b",
+                      fontWeight: "700",
+                      fontSize: "16px"
+                    }}>
+                      {formatCurrency(value, currency)}
+                    </span>,
+                    <span style={{ 
+                      color: name === "income" ? "#00ff88" : "#ff6b6b",
+                      fontWeight: "600"
+                    }}>
+                      {name === "income" ? "💰 Income" : "💸 Expenses"}
+                    </span>,
                   ]}
                 />
                 <Area
@@ -529,17 +549,35 @@ export function Dashboard() {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "hsl(var(--background))",
-                    border: "2px solid hsl(var(--border))",
-                    borderRadius: "12px",
-                    color: "hsl(var(--foreground))",
-                    boxShadow: "0 10px 25px rgba(0, 0, 0, 0.3)",
-                    fontSize: "14px",
-                    fontWeight: "500",
+                    backgroundColor: "#2d1b69",
+                    border: "3px solid #bb86fc",
+                    borderRadius: "16px",
+                    color: "#ffffff",
+                    boxShadow: "0 15px 35px rgba(187, 134, 252, 0.4), 0 5px 15px rgba(0, 0, 0, 0.3)",
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    padding: "12px 16px",
                   }}
-                  formatter={(value: number) => [
-                    formatCurrency(value, currency),
-                    "Amount",
+                  labelStyle={{
+                    color: "#bb86fc",
+                    fontWeight: "700",
+                    fontSize: "14px",
+                  }}
+                  formatter={(value: number, name: string) => [
+                    <span style={{ 
+                      color: "#ffd700",
+                      fontWeight: "700",
+                      fontSize: "18px",
+                      textShadow: "0 0 10px rgba(255, 215, 0, 0.5)"
+                    }}>
+                      {formatCurrency(value, currency)}
+                    </span>,
+                    <span style={{ 
+                      color: "#ff6b6b",
+                      fontWeight: "600"
+                    }}>
+                      💳 {name || "Amount"}
+                    </span>,
                   ]}
                 />
               </RePieChart>
