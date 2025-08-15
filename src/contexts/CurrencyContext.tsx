@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { convertCurrency, fetchExchangeRates } from '../lib/currencyConverter';
-import { useSuccessNotification, useErrorNotification } from '../components/NotificationSystem';
 
 interface CurrencyContextType {
   currency: string;
@@ -29,8 +28,6 @@ export function CurrencyProvider({ children, initialCurrency = 'USD' }: Currency
   const [currency, setCurrencyState] = useState(initialCurrency);
   const [isConverting, setIsConverting] = useState(false);
   const [exchangeRates, setExchangeRates] = useState<Record<string, number>>({});
-  const showSuccess = useSuccessNotification();
-  const showError = useErrorNotification();
 
   // Load exchange rates on mount and periodically
   useEffect(() => {
@@ -68,19 +65,10 @@ export function CurrencyProvider({ children, initialCurrency = 'USD' }: Currency
     setIsConverting(true);
     
     try {
-      // Get exchange rate for user feedback
-      const rate = exchangeRates[newCurrency] || 1;
-      const oldRate = exchangeRates[currency] || 1;
-      const conversionRate = currency === 'USD' ? rate : rate / oldRate;
-      
       setCurrencyState(newCurrency);
-      
-      showSuccess(
-        'Currency Changed',
-        `Switched to ${newCurrency}. Conversion rate: ${conversionRate.toFixed(4)}`
-      );
+      console.log(`Currency changed to ${newCurrency}`);
     } catch (error) {
-      showError('Currency Change Failed', 'Please try again later');
+      console.error('Currency change failed:', error);
     } finally {
       setIsConverting(false);
     }

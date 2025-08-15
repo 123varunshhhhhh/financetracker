@@ -19,14 +19,12 @@ import {
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, PieChart as RePieChart, Pie, Cell, Tooltip } from 'recharts';
 import { gsap } from 'gsap';
 import AddTransactionDialog from "./AddTransactionDialog";
-import { SidebarContext } from './FinTrackerApp';
-import { useCurrency } from '../contexts/CurrencyContext';
+import { SidebarContext, CurrencyContext } from './FinTrackerApp';
 import { getTransactions, getUserSettings, onTransactionsSnapshot, onBudgetsSnapshot, onGoalsSnapshot, onGoalDepositsSnapshot, GoalDeposit, Goal } from '../lib/firebaseApi';
 import { auth } from '../firebaseConfig';
 import { formatCurrency, formatPercentage, formatDate, calculateSavingsRate, getFinancialHealthScore } from '../lib/utils';
 import { DashboardSkeleton } from './LoadingSkeleton';
 import { ErrorBoundary } from './ErrorBoundary';
-import { useConvertedTransactions, useConvertedMonthlyData } from '../hooks/useConvertedTransactions';
 
 // --- Type Definitions ---
 interface Transaction {
@@ -64,7 +62,7 @@ export function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [userName, setUserName] = useState<string>('');
   const [user, setUser] = useState<any>(null);
-  const { currency } = useCurrency();
+  const { currency } = useContext(CurrencyContext);
 
   // Track auth state
   useEffect(() => {
@@ -118,37 +116,28 @@ export function Dashboard() {
     return <DashboardSkeleton />;
   }
 
-  // Use converted transactions and monthly data
-  const { 
-    convertedTransactions, 
-    isConverting: isConvertingTransactions,
-    totalIncome,
-    totalExpenses,
-    netBalance
-  } = useConvertedTransactions(transactions, 'USD');
-
-  // Compute monthly summaries from converted transactions
-  const groupByMonth = (transactions: any[]): MonthlyData[] => {
+  // Compute monthly summaries
+  const groupByMonth = (transactions: Transaction[]): MonthlyData[] => {
     const result: Record<string, MonthlyData> = {};
     transactions.forEach(t => {
       const d = new Date(t.date);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
       if (!result[key]) result[key] = { income: 0, expenses: 0, savings: 0, month: key };
-      if (t.type === 'income') result[key].income += t.displayAmount || t.amount;
-      if (t.type === 'expense') result[key].expenses += t.displayAmount || t.amount;
+      if (t.type === 'income') result[key].income += t.amount;
+      if (t.type === 'expense') result[key].expenses += t.amount;
     });
     return Object.values(result)
       .map(m => ({ ...m, savings: m.income - m.expenses }))
       .sort((a, b) => a.month.localeCompare(b.month));
   };
-  const monthlyData: MonthlyData[] = groupByMonth(convertedTransactions);
+  const monthlyData: MonthlyData[] = groupByMonth(transactions);
 
-  // Compute expense categories from converted transactions
-  const getExpenseCategories = (transactions: any[]): ExpenseCategory[] => {
+  // Compute expense categories
+  const getExpenseCategories = (transactions: Transaction[]): ExpenseCategory[] => {
     const map: Record<string, number> = {};
     transactions.forEach(t => {
       if (t.type === 'expense') {
-        map[t.category] = (map[t.category] || 0) + (t.displayAmount || t.amount);
+        map[t.category] = (map[t.category] || 0) + t.amount;
       }
     });
     return Object.entries(map).map(([name, value]) => ({
@@ -157,18 +146,18 @@ export function Dashboard() {
       color: `#${Math.floor(Math.random()*16777215).toString(16)}`
     }));
   };
-  const expenseCategories: ExpenseCategory[] = getExpenseCategories(convertedTransactions);
+  const expenseCategories: ExpenseCategory[] = getExpenseCategories(transactions);
 
-  // Compute recent transactions (last 5) from converted transactions
-  const recentTransactions = [...convertedTransactions]
+  // Compute recent transactions (last 5)
+  const recentTransactions = [...transactions]
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 5);
 
-  // Compute totals for cards using converted amounts
+  // Compute totals for cards
   const lastMonth: MonthlyData = monthlyData[monthlyData.length - 1] || { income: 0, expenses: 0, savings: 0, month: '' };
   const prevMonth: MonthlyData = monthlyData[monthlyData.length - 2] || { income: 0, expenses: 0, savings: 0, month: '' };
-  const totalBalance = netBalance; // Use converted net balance
-  const savingsGoal = 15000; // Example static goal - this should also be converted
+  const totalBalance = monthlyData.reduce((sum, m) => sum + m.savings, 0);
+  const savingsGoal = 15000; // Example static goal
   const currentSavings = totalBalance;
 
   const handleRefreshTransactions = async () => {
@@ -454,11 +443,9 @@ export function Dashboard() {
 }
 
 // Extracted Transaction Item component for better readability
+// Extracted Transaction Item component for better readability
 const TransactionItem = ({ transaction }: { transaction: any }) => {
-  const { currency } = useCurrency();
-  const displayAmount = transaction.displayAmount || transaction.amount;
-  const isConverted = transaction.isConverted || false;
-  
+  const { currency } = useContext(CurrencyContext);
   return (
     <div className="flex items-center justify-between p-4 rounded-lg bg-muted/20 hover:bg-muted/30 transition-colors">
       <div className="flex items-center space-x-4">
@@ -480,25 +467,13 @@ const TransactionItem = ({ transaction }: { transaction: any }) => {
             <span className="text-sm text-muted-foreground">
               {new Date(transaction.date).toLocaleDateString()}
             </span>
-            {isConverted && (
-              <Badge variant="outline" className="text-xs">
-                Converted
-              </Badge>
-            )}
           </div>
         </div>
       </div>
-      <div className="text-right">
-        <div className={`text-lg font-semibold ${
-          transaction.type === 'income' ? 'text-success' : 'text-destructive'
-        }`}>
-          {transaction.type === 'income' ? '+' : '-'}{formatCurrency(Math.abs(displayAmount), currency)}
-        </div>
-        {isConverted && transaction.originalAmount && transaction.originalCurrency && (
-          <div className="text-xs text-muted-foreground">
-            was {formatCurrency(transaction.originalAmount, transaction.originalCurrency)}
-          </div>
-        )}
+      <div className={`text-lg font-semibold ${
+        transaction.type === 'income' ? 'text-success' : 'text-destructive'
+      }`}>
+        {transaction.type === 'income' ? '+' : '-'}{formatCurrency(Math.abs(transaction.amount), currency)}
       </div>
     </div>
   );

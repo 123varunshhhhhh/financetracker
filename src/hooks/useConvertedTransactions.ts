@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useCurrency } from '../contexts/CurrencyContext';
 import { convertCurrency } from '../lib/currencyConverter';
 
 interface Transaction {
@@ -19,8 +18,7 @@ interface ConvertedTransaction extends Transaction {
   conversionRate?: number;
 }
 
-export function useConvertedTransactions(transactions: Transaction[], baseCurrency: string = 'USD') {
-  const { currency: displayCurrency, convertAmount } = useCurrency();
+export function useConvertedTransactions(transactions: Transaction[], displayCurrency: string, baseCurrency: string = 'USD') {
   const [convertedTransactions, setConvertedTransactions] = useState<ConvertedTransaction[]>([]);
   const [isConverting, setIsConverting] = useState(false);
 
@@ -48,7 +46,7 @@ export function useConvertedTransactions(transactions: Transaction[], baseCurren
             }
 
             // Convert the amount
-            const convertedAmount = await convertAmount(transaction.amount, fromCurrency, displayCurrency);
+            const convertedAmount = await convertCurrency(transaction.amount, fromCurrency, displayCurrency);
             
             return {
               ...transaction,
@@ -78,7 +76,7 @@ export function useConvertedTransactions(transactions: Transaction[], baseCurren
     };
 
     convertTransactions();
-  }, [transactions, displayCurrency, baseCurrency, convertAmount]);
+  }, [transactions, displayCurrency, baseCurrency]);
 
   // Calculate totals in display currency
   const totals = convertedTransactions.reduce(
@@ -102,76 +100,14 @@ export function useConvertedTransactions(transactions: Transaction[], baseCurren
   };
 }
 
-// Hook for converting individual amounts
-export function useAmountConverter() {
-  const { convertAmount, currency, isConverting } = useCurrency();
-
-  const convertAndFormat = async (
-    amount: number,
-    fromCurrency: string,
-    formatter?: (amount: number, currency: string) => string
-  ) => {
-    const convertedAmount = await convertAmount(amount, fromCurrency, currency);
-    
-    if (formatter) {
-      return formatter(convertedAmount, currency);
-    }
-    
-    return convertedAmount;
-  };
-
-  return {
-    convertAndFormat,
-    currentCurrency: currency,
-    isConverting,
-  };
-}
-
-// Hook for monthly data conversion
-export function useConvertedMonthlyData(monthlyData: any[], baseCurrency: string = 'USD') {
-  const { currency: displayCurrency, convertAmount } = useCurrency();
-  const [convertedData, setConvertedData] = useState<any[]>([]);
-  const [isConverting, setIsConverting] = useState(false);
-
-  useEffect(() => {
-    const convertData = async () => {
-      if (!monthlyData.length) {
-        setConvertedData([]);
-        return;
-      }
-
-      if (baseCurrency === displayCurrency) {
-        setConvertedData(monthlyData);
-        return;
-      }
-
-      setIsConverting(true);
-
-      try {
-        const converted = await Promise.all(
-          monthlyData.map(async (data) => ({
-            ...data,
-            income: await convertAmount(data.income, baseCurrency, displayCurrency),
-            expenses: await convertAmount(data.expenses, baseCurrency, displayCurrency),
-            savings: await convertAmount(data.savings, baseCurrency, displayCurrency),
-            netWorth: data.netWorth ? await convertAmount(data.netWorth, baseCurrency, displayCurrency) : 0,
-          }))
-        );
-
-        setConvertedData(converted);
-      } catch (error) {
-        console.error('Failed to convert monthly data:', error);
-        setConvertedData(monthlyData);
-      } finally {
-        setIsConverting(false);
-      }
-    };
-
-    convertData();
-  }, [monthlyData, displayCurrency, baseCurrency, convertAmount]);
-
-  return {
-    convertedData,
-    isConverting,
-  };
+// Simple amount converter function
+export async function convertAmount(amount: number, fromCurrency: string, toCurrency: string): Promise<number> {
+  if (fromCurrency === toCurrency) return amount;
+  
+  try {
+    return await convertCurrency(amount, fromCurrency, toCurrency);
+  } catch (error) {
+    console.error('Currency conversion failed:', error);
+    return amount;
+  }
 }
