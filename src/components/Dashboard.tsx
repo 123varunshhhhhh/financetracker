@@ -468,14 +468,28 @@ export function Dashboard() {
                 <YAxis stroke="hsl(var(--muted-foreground))" />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "rgba(0, 0, 0, 0.9)",
-                    border: "2px solid #4ECDC4",
-                    borderRadius: "8px",
+                    backgroundColor: "rgba(0, 0, 0, 0.95)",
+                    border: "3px solid #4ECDC4",
+                    borderRadius: "12px",
                     color: "#ffffff",
+                    fontSize: "16px",
+                    fontWeight: "bold",
+                    padding: "12px",
+                    boxShadow: "0 8px 25px rgba(78, 205, 196, 0.3)",
+                  }}
+                  itemStyle={{
+                    color: "#ffffff",
+                    fontWeight: "bold",
+                    fontSize: "16px",
+                  }}
+                  labelStyle={{
+                    color: "#4ECDC4",
+                    fontWeight: "bold",
+                    fontSize: "14px",
                   }}
                   formatter={(value: number, name: string) => [
                     formatCurrency(value, currency),
-                    name === "income" ? "Income" : "Expenses",
+                    name === "income" ? "💰 Income" : "💸 Expenses",
                   ]}
                 />
                 <Area
@@ -525,14 +539,28 @@ export function Dashboard() {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "rgba(0, 0, 0, 0.9)",
-                    border: "2px solid #bb86fc",
-                    borderRadius: "8px",
+                    backgroundColor: "rgba(0, 0, 0, 0.95)",
+                    border: "3px solid #bb86fc",
+                    borderRadius: "12px",
                     color: "#ffffff",
+                    fontSize: "16px",
+                    fontWeight: "bold",
+                    padding: "12px",
+                    boxShadow: "0 8px 25px rgba(187, 134, 252, 0.3)",
+                  }}
+                  itemStyle={{
+                    color: "#ffffff",
+                    fontWeight: "bold",
+                    fontSize: "16px",
+                  }}
+                  labelStyle={{
+                    color: "#bb86fc",
+                    fontWeight: "bold",
+                    fontSize: "14px",
                   }}
                   formatter={(value: number) => [
                     formatCurrency(value, currency),
-                    "Amount",
+                    "💳 Amount",
                   ]}
                 />
               </RePieChart>
