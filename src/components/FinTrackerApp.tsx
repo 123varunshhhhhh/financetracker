@@ -14,7 +14,7 @@ import { Analytics } from '@/components/Analytics';
 import { Goals } from '@/components/Goals';
 import { Settings } from '@/components/Settings';
 import { EnhancementRoadmap } from '@/components/EnhancementRoadmap';
-import { CurrencyRateTicker } from '@/components/CurrencySelector';
+import { CurrencyProvider } from '../contexts/CurrencyContext';
 import FinTrackerLogo from './FinTrackerLogo';
 
 export type View = 'dashboard' | 'transactions' | 'budget' | 'analytics' | 'goals' | 'settings' | 'roadmap';
@@ -76,7 +76,7 @@ const FinTrackerApp = () => {
   
   return (
     <SidebarContext.Provider value={{ currentView, setCurrentView }}>
-      <CurrencyContext.Provider value={{ currency }}>
+      <CurrencyProvider initialCurrency={currency}>
         <div className="min-h-screen w-full bg-gradient-to-br from-background to-muted/20">
           {/* Mobile Hamburger */}
           <button
@@ -140,14 +140,6 @@ const FinTrackerApp = () => {
                   </button>
                 ))}
               </nav>
-              
-              {/* Currency Rate Ticker */}
-              <div className="mt-8 p-3 bg-muted/20 rounded-lg">
-                <div className="text-xs font-medium text-muted-foreground mb-2">
-                  Exchange Rates
-                </div>
-                <CurrencyRateTicker currencies={['EUR', 'GBP', 'INR']} />
-              </div>
             </div>
 
             {/* Main Content */}
@@ -156,7 +148,7 @@ const FinTrackerApp = () => {
             </main>
           </div>
         </div>
-      </CurrencyContext.Provider>
+      </CurrencyProvider>
     </SidebarContext.Provider>
   );
 };
